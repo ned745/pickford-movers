@@ -1,0 +1,8 @@
+{% extends "customer/base.html" %}{% block title %}Create account | Pickford Movers{% endblock %}{% block heading %}Create your account{% endblock %}
+{% block portal_content %}<form method="post" class="portal-form">
+<label>Full name<input name="full_name" required autocomplete="name"></label>
+<label>Email address<input type="email" name="email" required autocomplete="email"></label>
+<label>Phone number<input name="phone" required autocomplete="tel"></label>
+<label>Password (at least 8 characters)<input type="password" name="password" minlength="8" required autocomplete="new-password"></label>
+<label>Confirm password<input type="password" name="confirm_password" minlength="8" required autocomplete="new-password"></label>
+<button class="btn btn-gold" type="submit">Create account</button></form><p>Already registered? <a href="{{ url_for('customer_login') }}">Sign in</a>.</p>{% endblock %}

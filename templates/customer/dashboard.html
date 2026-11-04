@@ -1,0 +1,8 @@
+{% extends "customer/base.html" %}{% block title %}My moves | Pickford Movers{% endblock %}{% block heading %}Hello, {{ session.get('customer_name','Customer') }}{% endblock %}
+{% block portal_content %}
+<div class="portal-top"><p>Here are the moving requests linked to your account.</p><a class="btn btn-gold" href="{{ url_for('request_quote') }}">Request a new quote</a><a class="btn btn-outline" href="{{ url_for('customer_messages') }}">Messages</a></div>
+{% if bookings %}<div class="portal-table-wrap"><table class="portal-table"><thead><tr><th>Reference</th><th>Service</th><th>Move date</th><th>Booking status</th><th>Quotation / payment</th><th></th></tr></thead><tbody>
+{% for b in bookings %}<tr><td><strong>{{ b.reference }}</strong></td><td>{{ b.service }}</td><td>{{ b.move_date or 'To be agreed' }}</td><td>{{ b.status }}</td><td>{% if b.quote_token %}<a href="{{ url_for('customer_quote', token=b.quote_token) }}">{{ b.quote_number }} · {{ b.quote_currency }} {{ '%.2f'|format(b.quote_total) }}</a><br><small>{{ b.quote_status }} · Payment: {{ b.payment_status }}</small>{% else %}Quotation pending{% endif %}</td><td><a href="{{ url_for('customer_booking_detail', booking_id=b.id) }}">Details →</a></td></tr>{% endfor %}
+</tbody></table></div>{% else %}<p>No moving requests are linked to your account yet. <a href="{{ url_for('request_quote') }}">Start a quote request</a>.</p>{% endif %}
+<form method="post" action="{{ url_for('customer_logout') }}"><button class="btn btn-outline" type="submit">Sign out</button></form>
+{% endblock %}

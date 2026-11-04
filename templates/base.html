@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Pickford Movers provides residential, commercial and worldwide relocation, storage and logistics services.">
+  <title>{% block title %}Pickford Movers | Moving Without Boundaries{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="topbar">
+    <div class="container topbar-inner">
+      <span>☎ <a href="tel:0726775604">0726775604</a></span>
+      <span>✉ <a href="mailto:pickfordmoverskenya@gmail.com">pickfordmoverskenya@gmail.com</a></span>
+      <span>◎ Worldwide coverage</span>
+      <a class="top-track" href="{{ url_for('request_quote') }}">Request a move</a>
+    </div>
+  </div>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="{{ url_for('home') }}" aria-label="Pickford Movers home">
+        <span class="brand-mark">PM</span>
+        <span><strong>PICKFORD <em>MOVERS</em></strong><small>MOVING PEOPLE. MOVING POSSIBILITIES.</small></span>
+      </a>
+      <button class="menu-toggle" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <nav class="main-nav">
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('services') }}">Services</a>
+        <a href="{{ url_for('about') }}">About us</a>
+        <a href="{{ url_for('gallery') }}">Our work</a>
+        <a href="{{ url_for('contact') }}">Contact</a>
+        {% if session.get("customer_id") %}<a href="{{ url_for('customer_dashboard') }}">My account</a>{% else %}<a href="{{ url_for('customer_login') }}">Customer login</a>{% endif %}
+        <a class="btn btn-gold nav-cta" href="{{ url_for('request_quote') }}">Request a quote <span>→</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>{% block content %}{% endblock %}</main>
+
+  <section class="support-strip">
+    <div class="container support-inner">
+      <div><span class="support-icon">✦</span><div><strong>Need a hand planning your move?</strong><p>Talk to our support team or start with our website assistant.</p></div></div>
+      <a class="btn btn-gold" href="https://wa.me/254726775604?text=Hello%20Pickford%20Movers%2C%20I%20need%20assistance." target="_blank" rel="noopener">Chat on WhatsApp ↗</a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-main">
+      <a class="brand footer-brand" href="{{ url_for('home') }}">
+        <span class="brand-mark">PM</span>
+        <span><strong>PICKFORD <em>MOVERS</em></strong><small>MOVING PEOPLE. MOVING POSSIBILITIES.</small></span>
+      </a>
+      <div><h4>Explore</h4><a href="{{ url_for('services') }}">Our services</a><a href="{{ url_for('gallery') }}">Project gallery</a><a href="{{ url_for('about') }}">About us</a></div>
+      <div><h4>Get in touch</h4><a href="tel:0726775604">0726775604</a><a href="mailto:pickfordmoverskenya@gmail.com">Email Pickford Movers</a><span>Worldwide relocation</span></div>
+    </div>
+    <div class="container footer-bottom"><span>© 2026 Pickford Movers. All rights reserved.</span><span>Kenya · Africa · Worldwide</span></div>
+  </footer>
+
+  <button class="assistant-launch" id="assistantLaunch" aria-label="Open Pickford assistant">✦</button>
+  <aside class="assistant-panel" id="assistantPanel" aria-label="Pickford website assistant" hidden>
+    <div class="assistant-head"><span class="assistant-avatar">PM</span><div><strong>Pickford Assistant</strong><small>Online · Guided support</small></div><button id="assistantClose" aria-label="Close assistant">×</button></div>
+    <div class="assistant-chat" id="assistantChat" aria-live="polite"><p class="assistant-bubble">Hello! Welcome to Pickford Movers. Ask me about our services, quotations, payments or tracking a booking.</p></div>
+    <form class="assistant-compose" id="assistantForm"><input id="assistantInput" type="text" maxlength="1000" placeholder="Type your question…" aria-label="Your question" required><button type="submit" aria-label="Send message">➤</button></form>
+    <div class="assistant-note">Automated guidance only. Prices, availability and bookings are confirmed by our team.</div>
+  </aside>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

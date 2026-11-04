@@ -1,0 +1,45 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Customer Messages | Pickford Admin{% endblock %}
+{% block heading %}Customer Messages{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <div class="panel-head">
+        <div>
+            <h3>Customer inbox</h3>
+            <p>Conversations from your customers</p>
+        </div>
+        <a href="{{ url_for('admin_dashboard') }}">Back to overview</a>
+    </div>
+
+    {% if conversations %}
+        <div class="recent-list">
+            {% for item in conversations %}
+                <div class="recent-item">
+                    <div style="flex:1">
+                        <b>{{ item.full_name }}</b>
+                        <small>{{ item.email }} · {{ item.phone }}</small>
+                        <small>{{ item.last_message[:140] }}</small>
+                    </div>
+
+                    {% if item.unread_count %}
+                        <span class="status draft">
+                            {{ item.unread_count }} unread
+                        </span>
+                    {% endif %}
+
+                    <a href="{{ url_for('admin_message_thread', customer_id=item.customer_id) }}">
+                        Open conversation
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty">
+            <b>No customer messages yet</b>
+            <p>Messages sent from customer accounts will appear here.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <div class="hero-shade"></div>
+  <div class="container hero-content">
+    <span class="eyebrow">WORLDWIDE RELOCATION & LOGISTICS</span>
+    <h1>Moving Without<br><span>Boundaries.</span></h1>
+    <p>From local household moves to international relocation, we make every journey simpler, safer and more professional.</p>
+    <div class="hero-actions"><a class="btn btn-gold" href="{{ url_for('request_quote') }}">Get a moving quote <b>→</b></a><a class="btn btn-outline" href="{{ url_for('services') }}">Explore services</a></div>
+    <div class="hero-points"><span>✓ Safe & secure</span><span>✧ Professional team</span><span>◎ Worldwide coverage</span></div>
+  </div>
+  <div class="hero-caption">PICKFORD MOVERS <span>·</span> MOVING PEOPLE. MOVING POSSIBILITIES.</div>
+</section>
+
+<section class="section services-preview">
+  <div class="container">
+    <div class="section-heading"><span class="eyebrow dark">WHAT WE DO</span><h2>Moving & logistics, <span>made easier.</span></h2><p>One dependable partner for every stage of your move.</p></div>
+    <div class="service-grid">
+      {% set items = [
+      ('⌂','Residential & household relocation','Careful, organised moves for houses and apartments.'),
+      ('▦','Office & commercial relocation','Planned moves that help your business get back to work.'),
+      ('⌖','Local & long-distance moving','Reliable transport for moves near and far.'),
+      ('◎','International relocation','Support coordinating moves across borders.'),
+      ('▱','Furniture dismantling & installation','Practical help with furniture setup and handling.'),
+      ('◇','Professional packing & unpacking','Thoughtful packing to protect your belongings.'),
+      ('⌂','Storage & warehousing','Storage solutions for items between destinations.'),
+      ('▰','Vehicle transportation','Enquire about vehicle collection and delivery.'),
+      ('≋','Cargo & freight logistics','Coordinated cargo movement and freight support.')
+      ] %}
+      {% for icon, title, desc in items %}
+      <article class="service-card"><span class="service-icon">{{ icon }}</span><h3>{{ title }}</h3><p>{{ desc }}</p><a href="{{ url_for('services') }}">Learn more <b>→</b></a></article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="global-band">
+  <div class="container global-inner"><div><span class="eyebrow">GLOBAL COVERAGE</span><h2>Kenya. Africa. <span>Worldwide.</span></h2><p>Wherever your next chapter takes you, start the conversation with Pickford Movers.</p><a class="btn btn-gold" href="{{ url_for('request_quote') }}">Plan your move →</a></div><div class="global-orbit"><span>KENYA</span><i>✦</i><b>AFRICA</b><small>WORLDWIDE REACH</small></div></div>
+</section>
+
+<section class="section process-section"><div class="container"><div class="section-heading"><span class="eyebrow dark">A CLEARER WAY TO MOVE</span><h2>Your move, <span>step by step.</span></h2></div><div class="process-grid">
+  {% for n, title, desc in [('01','Request a quote','Tell us what you are moving and where.'),('02','We review your needs','Our team checks the details and follows up.'),('03','Receive your quotation','Review the proposed service and costs.'),('04','Confirm your move','Accept the quotation and arrange payment with our team.'),('05','We coordinate','We plan the people, timing and logistics.'),('06','Move completed','Your move is carried out with care.') ] %}
+  <article class="process-card"><span>{{ n }}</span><h3>{{ title }}</h3><p>{{ desc }}</p></article>
+  {% endfor %}
+</div><p class="fine-print">Submitting an enquiry is a request, not a confirmed booking. Our team will confirm availability, quotation and next steps with you.</p></div></section>
+
+<section class="section gallery-section"><div class="container gallery-layout"><div class="gallery-intro"><span class="eyebrow dark">OUR WORK</span><h2>Real work.<br><span>Real care.</span></h2><p>Explore completed projects and service highlights from the Pickford Movers team.</p><a class="text-link" href="{{ url_for('gallery') }}">Explore the project gallery →</a></div><div class="gallery-tiles"><div class="gallery-tile tile-one"><span>Residential moves</span></div><div class="gallery-tile tile-two"><span>Office relocation</span></div><div class="gallery-tile tile-three"><span>Packing & storage</span></div></div></div><div class="container"><p class="fine-print">Gallery images shown in this preview are illustrative placeholders, not verified Pickford Movers projects. The live gallery will feature administrator-approved company photos.</p></div></section>
+
+<section class="testimonial-band"><div class="container testimonial-inner"><div><span class="eyebrow">THE PICKFORD PROMISE</span><h2>Every move deserves<br>care and attention.</h2></div><p>We believe a great moving experience starts with clear communication, careful planning and respect for the things that matter to you.</p></div></section>
+{% endblock %}

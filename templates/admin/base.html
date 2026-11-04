@@ -1,0 +1,67 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>{% block title %}Admin | Pickford Movers{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/admin.css') }}">
+</head>
+<body>
+<div class="admin-shell">
+    <aside class="sidebar">
+
+        <a class="admin-brand" href="{{ url_for('admin_dashboard') }}">
+            <span>PM</span>
+            <div>
+                <b>PICKFORD</b>
+                <small>MOVERS · ADMIN</small>
+            </div>
+        </a>
+
+        <p class="side-label">WORKSPACE</p>
+
+        <a href="{{ url_for('admin_dashboard') }}">▦ &nbsp; Overview</a>
+        <a href="{{ url_for('admin_gallery') }}">▧ &nbsp; Project gallery</a>
+        <a href="{{ url_for('admin_bookings') }}">▤ &nbsp; Booking enquiries</a>
+        <a href="{{ url_for('admin_messages') }}">✉ &nbsp; Messages / Inbox</a>
+        <a href="{{ url_for('admin_bookings') }}">▧ &nbsp; Quotations (open a booking)</a>
+
+        <div class="side-note">
+            Review incoming enquiries, update their workflow status and keep internal notes.
+        </div>
+
+        <a class="back-link" href="{{ url_for('home') }}">↗ &nbsp; View public website</a>
+
+        <form method="post" action="{{ url_for('admin_logout') }}">
+            <button class="logout">↪ &nbsp; Sign out</button>
+        </form>
+
+    </aside>
+
+    <main class="admin-main">
+
+        <header class="top-head">
+            <div>
+                <span>ADMINISTRATION</span>
+                <h1>{% block heading %}Workspace{% endblock %}</h1>
+            </div>
+
+            <div class="admin-user">
+                <i>{{ session.get('admin_username','A')[:1]|upper }}</i>
+                <span>{{ session.get('admin_username','Admin') }}</span>
+            </div>
+        </header>
+
+        {% with messages=get_flashed_messages(with_categories=true) %}
+            {% for category,message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+
+    </main>
+</div>
+</body>
+</html>

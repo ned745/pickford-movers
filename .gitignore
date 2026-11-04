@@ -1,0 +1,16 @@
+# Python environment
+.venv/
+__pycache__/
+*.py[cod]
+
+# Private configuration
+.env
+.env.*
+
+# Local database and backups
+instance/*.db
+*.sqlite
+*.sqlite3
+
+# Local backups
+app_before_*.py
