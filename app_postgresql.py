@@ -955,8 +955,8 @@ def customer_messages():
 # ============================================================
 
 @app.route("/admin/login", methods=["GET", "POST"])
-def admin_login():
 
+def admin_login():
     if session.get("admin_id"):
         return redirect(url_for("admin_dashboard"))
 
