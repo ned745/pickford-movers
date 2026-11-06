@@ -9,6 +9,7 @@ import psycopg2
 from psycopg2.extras import DictCursor
 from email.message import EmailMessage
 from dotenv import load_dotenv
+from google import genai
 from pathlib import Path
 from functools import wraps
 from datetime import datetime, timedelta
@@ -22,6 +23,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
 load_dotenv()
+gemini_client = genai.Client(
+    api_key=os.environ.get("GEMINI_API_KEY")
+)
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "instance" / "pickford.db"
@@ -195,6 +199,7 @@ def init_db():
                     created_at TEXT NOT NULL
                 )
             """)
+            
 
             db.execute("""
                 CREATE TABLE IF NOT EXISTS messages (
@@ -413,6 +418,7 @@ def allowed_file(filename):
 # PHASE 6: GUIDED WEBSITE ASSISTANT
 # ============================================================
 
+
 @app.route("/assistant/chat", methods=["POST"])
 def assistant_chat():
 
@@ -432,24 +438,97 @@ def assistant_chat():
 
     now = datetime.now().isoformat(timespec="seconds")
 
+    # Retrieve recent conversation history before saving
     with connect_db() as db:
+        history = db.execute("""
+            SELECT sender, message
+            FROM assistant_messages
+            WHERE conversation_id = ?
+            ORDER BY id DESC
+            LIMIT 12
+        """, (conversation_id,)).fetchall()
+
         db.execute("""
             INSERT INTO assistant_messages
             (conversation_id, sender, message, created_at)
             VALUES (?, ?, ?, ?)
         """, (conversation_id, "customer", message, now))
 
+    # Build conversation context
+    history_text = ""
+
+    for item in reversed(history):
+        sender = item["sender"]
+        previous_message = item["message"]
+
+        if sender in ("customer", "assistant"):
+            history_text += (
+                f"{sender.upper()}: {previous_message}\n"
+            )
+
     q = message.lower()
 
+    # Pickford Movers AI instructions
+    system_prompt = """
+You are the official AI customer support assistant
+for PICKFORD MOVERS.
+
+Your role is to assist customers professionally,
+politely and naturally.
+
+BUSINESS INFORMATION:
+- Business: PICKFORD MOVERS
+- Phone: 0726775604
+- Email: pickfordmoverskenya@gmail.com
+- Currency: KES
+- Coverage: Worldwide.
+
+SERVICES:
+1. Residential and household relocation.
+2. Office and commercial relocation.
+3. Local and long-distance moving.
+4. International relocation.
+5. Furniture dismantling and installation.
+6. Professional packing and unpacking.
+7. Storage and warehousing.
+8. Vehicle transportation.
+9. Cargo and freight logistics.
+
+IMPORTANT RULES:
+- Be friendly, professional and helpful.
+- Understand the customer's conversation and follow-up questions.
+- Ask relevant questions when information is missing.
+- Never invent prices, quotations, discounts or booking details.
+- Explain that customers can request personalised quotations.
+- Payment instructions are provided by administrators.
+- Payments are manually verified by administrators.
+- Never ask customers to disclose passwords, PINs
+  or payment security codes.
+- Do not claim a booking or payment has been confirmed.
+- For account-specific booking information, direct
+  customers to the customer portal.
+- If a customer requests human assistance, encourage
+  them to contact the Pickford Movers team.
+- Keep responses clear and reasonably concise.
+"""
+
+    # Default action
+    action = None
+
+    # Determine relevant website action
     if any(w in q for w in (
+        "human", "person", "agent", "staff",
+        "talk to someone", "speak to someone",
+        "call someone", "representative"
+    )):
+        action = {
+            "label": "Chat with support",
+            "url": "https://wa.me/254726775604"
+        }
+
+    elif any(w in q for w in (
         "price", "cost", "how much", "quote", "quotation"
     )):
-        reply = (
-            "Moving costs depend on the service, route, volume, "
-            "access and any special handling. I cannot make up a "
-            "price, but you can submit your details for a "
-            "personalised quotation."
-        )
         action = {
             "label": "Request a quotation",
             "url": url_for("request_quote")
@@ -458,11 +537,6 @@ def assistant_chat():
     elif any(w in q for w in (
         "track", "status", "booking", "reference", "my move"
     )):
-        reply = (
-            "You can check your relocation requests and updates "
-            "in the customer portal. Sign in to view bookings "
-            "linked to your account."
-        )
         action = {
             "label": "Open customer portal",
             "url": url_for("customer_login")
@@ -471,99 +545,75 @@ def assistant_chat():
     elif any(w in q for w in (
         "pay", "payment", "mpesa", "deposit"
     )):
-        reply = (
-            "Payment instructions are provided by the Pickford "
-            "Movers team after your quotation is issued and "
-            "accepted. Payments are verified manually by an "
-            "administrator. Please do not send money to an "
-            "unverified number."
-        )
         action = {
-            "label": "Contact support on WhatsApp",
-            "url": "https://wa.me/254726775604?text=Hello%20Pickford%20Movers%2C%20I%20need%20help%20with%20payment."
+            "label": "Contact payment support",
+            "url": "https://wa.me/254726775604"
         }
 
     elif any(w in q for w in (
-        "international", "abroad", "overseas", "country"
-    )):
-        reply = (
-            "We handle international relocation enquiries. "
-            "Tell us your origin, destination country, preferred "
-            "date and what you plan to move so the team can "
-            "review the requirements."
-        )
-        action = {
-            "label": "Start an enquiry",
-            "url": url_for("request_quote")
-        }
-
-    elif any(w in q for w in (
-        "storage", "warehouse", "store"
-    )):
-        reply = (
-            "Pickford Movers offers storage and warehousing "
-            "enquiries. Share the items, approximate volume, "
-            "location and expected storage period for a "
-            "tailored response."
-        )
-        action = {
-            "label": "Request a storage quote",
-            "url": url_for("request_quote")
-        }
-
-    elif any(w in q for w in (
-        "vehicle", "car", "motorcycle", "bike"
-    )):
-        reply = (
-            "We accept vehicle transportation enquiries. "
-            "Please provide the vehicle type, collection point, "
-            "destination and preferred transport date."
-        )
-        action = {
-            "label": "Vehicle transport enquiry",
-            "url": url_for("request_quote")
-        }
-
-    elif any(w in q for w in (
-        "service", "move", "moving", "relocation", "office",
+        "service", "moving", "relocation", "office",
         "house", "furniture", "packing", "cargo", "freight"
     )):
-        reply = (
-            "Our services include household and office relocation, "
-            "local and long-distance moving, international relocation, "
-            "furniture dismantling and installation, packing and "
-            "unpacking, storage and warehousing, vehicle transportation, "
-            "and cargo and freight logistics."
-        )
         action = {
             "label": "Explore all services",
             "url": url_for("services")
         }
 
-    elif any(w in q for w in (
-        "human", "person", "agent", "staff", "talk", "contact", "help"
-    )):
-        reply = (
-            "Of course. Our support team can assist you directly "
-            "on WhatsApp or by phone at 0726775604."
-        )
-        action = {
-            "label": "Chat with support",
-            "url": "https://wa.me/254726775604?text=Hello%20Pickford%20Movers%2C%20I%20need%20assistance."
-        }
+    # Generate Gemini response
+    try:
+        prompt = f"""
+{system_prompt}
 
-    else:
-        reply = (
-            "I can help with services, quotations, booking tracking, "
-            "storage, vehicle transport and payment guidance. For a "
-            "question that needs a team member, contact us on "
-            "WhatsApp or call 0726775604."
-        )
-        action = {
-            "label": "Speak to our team",
-            "url": "https://wa.me/254726775604?text=Hello%20Pickford%20Movers%2C%20I%20have%20a%20question."
-        }
+RECENT CONVERSATION:
+{history_text}
 
+CUSTOMER'S NEW MESSAGE:
+{message}
+
+Respond directly to the customer's latest message.
+"""
+        result = None
+
+        for model_name in (
+            "gemini-3.6-flash",
+            "gemini-3.7-flash",
+            "gemini-3.8-flash"
+        ):
+            try:
+                result = gemini_client.models.generate_content(
+                    model=model_name,
+                    contents=prompt
+                )
+                break
+            except Exception:
+                app.logger.exception(
+                    "Gemini model %s failed", model_name
+                )
+
+        if result is None:
+            raise RuntimeError("All Gemini models failed.")
+
+        reply = (result.text or "").strip()
+
+        if not reply:
+            raise ValueError("Gemini returned an empty response.")
+
+    except Exception:
+        app.logger.exception("Gemini assistant request failed")
+
+        reply = (
+            "I'm sorry, I'm having trouble responding right now. "
+            "Please contact our Pickford Movers team on "
+            "0726775604 or WhatsApp for assistance."
+        )
+
+        if action is None:
+            action = {
+                "label": "Chat with support",
+                "url": "https://wa.me/254726775604"
+            }
+
+    # Save assistant response
     with connect_db() as db:
         db.execute("""
             INSERT INTO assistant_messages
@@ -576,8 +626,10 @@ def assistant_chat():
             datetime.now().isoformat(timespec="seconds")
         ))
 
-    return jsonify({"reply": reply, "action": action})
-
+    return jsonify({
+        "reply": reply,
+        "action": action
+    })
 
 # ============================================================
 # PUBLIC WEBSITE
